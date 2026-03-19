@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure APIM Onboarding Tool</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <div class="header-text">
+                <h1>API Management Onboarding</h1>
+                <p>Automated Infrastructure-as-Code Generator</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <form action="/generate" method="POST" class="onboarding-form">
+
+            <section>
+                <h3>General & Governance</h3>
+                <label>Service Name *</label>
+                <input type="text" name="display_name" placeholder="e.g., Supplier Onboarding API" required>
+
+                <label>Business Domain *</label>
+              <input type="text" name="business_domain" placeholder="Examples / Notes: Does this belong to an existing group, or is it a brand new workload?" required>
+
+
+                <label>Description</label>
+                <textarea name="description" rows="2" placeholder="A short summary of what this API or AI model does for the Developer Portal catalog."></textarea>
+            </section>
+
+            <section>
+                <h3>Technical & Routing Details</h3>
+                <label>Unique Name for URL(Suffix)</label>
+                <input type="text" name="api_suffix" placeholder="Short and Unique Name (for the URL)" required>
+
+                <label>Backend Type *</label>
+                <select name="app_type" id="app_type" onchange="toggleAIFields()" required>
+                    <option value="fastapi">FastAPI (App Service)</option>
+                    <option value="logic_app">Logic App</option>
+                    <option value="ai_foundry">Azure AI Foundry</option>
+                </select>
+
+                <label id="backend-url-label">Target Backend URL *</label>
+                <input type="url" name="backend_url" placeholder="https://your-service.azurewebsites.net" required>
+
+                <div id="ai-only-fields" style="display:none; background: #f0f7ff; padding: 15px; margin-top: 10px; border-left: 4px solid #0078d4;">
+                      <label>Foundry Resource ID</label>
+                    <input type="text" name="entra_resource_id" placeholder="This is using entra id approach">
+
+                    <label>Model Deployment Name</label>
+                    <input type="text" name="model_name" placeholder="e.g., gpt-4o">
+
+                </div>
+            </section>
+
+            <section id="mapping-section">
+                <h3> Endpoints & Operations Mapping</h3>
+                <table id="operations-table">
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>APIM Endpoint URL</th>
+                            <th>Backend Path</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="methods[]">
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                </select>
+                            </td>
+                            <td><input type="text" name="f_paths[]" placeholder="/data" required></td>
+                            <td><input type="text" name="b_paths[]" placeholder="/api/v1/data"></td>
+                            <td></td> </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn-secondary" onclick="addRow()">+ Add Operation</button>
+            </section>
+            <section>
+    <h3> Traffic Management & Policies</h3>
+
+     <label>Subscription required</label>
+    <select name="sub_required">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+    </select>
+
+<label>Enable Web Browser Access (CORS)</label>
+<select name="CORS" id="cors_select" onchange="toggleAIFields()">
+    <option value="no">No</option>
+    <option value="yes">Yes</option>
+</select>
+
+<div id="cors-details" style="display:none; margin-top: 10px; background: #fafafa; padding: 15px; border: 1px solid #ddd;">
+    <label>Allowed Website Addresses (Origins)</label>
+    <table id="cors-table" style="width: 100%;">
+        <tbody id="cors-tbody">
+            <tr>
+                <td><input type="url" name="cors_origins[]" placeholder="https://myapp.company.com" style="width: 90%;"></td>
+                <td><button type="button" onclick="this.closest('tr').remove()" style="background:none; border:none; color:red; cursor:pointer;">&times;</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <button type="button" class="btn-secondary" onclick="addCorsRow()" style="margin-top: 5px; font-size: 0.8rem;">+ Add Another Domain</button>
+</div>
+
+    <label>Identify User By (For Throttling)</label>
+    <select name="limit_by">
+        <option value="key">Subscription Key (Standard)</option>
+        <option value="ip">IP Address</option>
+        <option value="both">Both</option>
+    </select>
+
+    <div class="input-row">
+        <div class="input-group">
+            <label>Rate Limit (Calls)</label>
+            <input type="number" name="rate_limit" value="100">
+        </div>
+        <div class="input-group">
+            <label>Period (Seconds)</label>
+            <input type="number" name="rate_period" value="60">
+        </div>
+    </div>
+
+    <label>Daily Quota (Total Calls, if you enter 0 it means there is no quota )</label>
+    <input type="number" name="quota" value="10000">
+</section>
+
+            <button type="submit" class="btn-generate">Generate Terraform Scripts</button>
+        </form>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

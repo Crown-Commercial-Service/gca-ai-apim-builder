@@ -1,0 +1,69 @@
+<policies>
+    <inbound>
+        <base />
+
+        {% if enable_cors %}
+        <cors allow-credentials="true">
+            <allowed-origins>
+                <origin>{{ cors_origins }}</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>POST</method>
+                <method>OPTIONS</method>
+            </allowed-methods>
+            <allowed-headers>
+                <header>*</header>
+            </allowed-headers>
+        </cors>
+        {% endif %}
+
+        <authentication-managed-identity
+            resource="https://cognitiveservices.azure.com"
+            output-token-variable-name="msi-token"
+            ignore-error="false" />
+
+        <set-header name="Authorization" exists-action="override">
+            <value>@("Bearer " + (string)context.Variables["msi-token"])</value>
+        </set-header>
+
+        <rate-limit-by-key
+            calls="{{ rate_limit }}"
+            renewal-period="{{ rate_period }}"
+            counter-key="@(
+                {%- if limit_by == 'both' -%}
+                    context.Request.IpAddress + context.Subscription.Id
+                {%- elif limit_by == 'ip' -%}
+                    context.Request.IpAddress
+                {%- else -%}
+                    context.Subscription.Id
+                {%- endif -%}
+            )" />
+
+        {% if quota and quota | int > 0 %}
+        <quota-by-key
+            calls="{{ quota }}"
+            renewal-period="3600"
+            counter-key="@(
+                {%- if limit_by == 'both' -%}
+                    context.Request.IpAddress + context.Subscription.Id
+                {%- elif limit_by == 'ip' -%}
+                    context.Request.IpAddress
+                {%- else -%}
+                    context.Subscription.Id
+                {%- endif -%}
+            )" />
+        {% endif %}
+
+        <set-backend-service backend-id="{{ api_suffix }}-backend" />
+
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>

@@ -1,0 +1,116 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.0.0"
+    }
+  }
+}
+
+# 1. The APIM Service Instance
+resource "azurerm_api_management" "apim" {
+  name                = lower("${var.prefix}-{{ api_suffix }}-apim")
+  location            = var.resource_group_location
+  resource_group_name = var.resource_group_name
+  publisher_name      = "AI-Team"
+  publisher_email     = "aiteam@technology.com"
+  sku_name            = "Developer_1"
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+# 2. The Backend Connection (The Logic App Trigger URL)
+resource "azurerm_api_management_backend" "logic_backend" {
+  name                = "{{ api_suffix }}-backend"
+  resource_group_name = var.resource_group_name
+  api_management_name = azurerm_api_management.apim.name
+  protocol            = "http"
+  url                 = "{{ backend_url }}"
+  description         = "Backend for Logic App: {{ display_name }}"
+}
+
+# 3. The API Definition (The "Shell" for the operations)
+resource "azurerm_api_management_api" "logic_api" {
+  name                = "{{ api_suffix }}-api"
+  resource_group_name = var.resource_group_name
+  api_management_name = azurerm_api_management.apim.name
+  revision            = "1"
+  display_name        = "{{ display_name }}"
+  path                = "{{ api_suffix }}"
+  protocols           = ["https"]
+
+  subscription_required = {{ sub_required | lower }}
+}
+
+# 4. DYNAMIC OPERATIONS
+# This loops through the 'f_paths' and 'methods' lists you captured in Python
+{% for i in range(f_paths|length) %}
+resource "azurerm_api_management_api_operation" "op_{{ i }}" {
+  # Create a unique ID by replacing slashes with dashes
+  operation_id        = "op-{{ f_paths[i] | replace('/', '-') | lower }}-{{ methods[i] | lower }}"
+  api_name            = azurerm_api_management_api.logic_api.name
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resource_group_name
+
+  display_name        = "Action: {{ f_paths[i] }}"
+  method              = "{{ methods[i] | upper }}"
+  # Ensure the path starts with a slash
+  url_template        = "{{ f_paths[i] if f_paths[i].startswith('/') else '/' + f_paths[i] }}"
+
+  description         = "Mapped to Backend Path: {{ b_paths[i] }}"
+
+  response {
+    status_code = 200
+  }
+}
+{% endfor %}
+
+# 5. Product (The Package)
+resource "azurerm_api_management_product" "apim_product" {
+  product_id            = "{{ api_suffix }}-product"
+  api_management_name   = azurerm_api_management.apim.name
+  resource_group_name   = var.resource_group_name
+  display_name          = "{{ display_name }} Product"
+  subscription_required = {{ sub_required | lower }}
+  published             = true
+}
+
+# 6. Linking API to Product
+resource "azurerm_api_management_product_api" "product_api_link" {
+  api_name            = azurerm_api_management_api.logic_api.name
+  product_id          = azurerm_api_management_product.apim_product.product_id
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resource_group_name
+}
+
+# 7. Subscription (Conditional based on your boolean)
+{% if sub_required %}
+resource "azurerm_api_management_subscription" "user_subscription" {
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resource_group_name
+  product_id          = azurerm_api_management_product.apim_product.id
+  display_name        = "{{ display_name }} Subscription Key"
+  state               = "active"
+}
+{% endif %}
+
+# 8. Policy (Applies the XML file logic)
+resource "azurerm_api_management_api_policy" "apim_policy" {
+  api_name            = azurerm_api_management_api.logic_api.name
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resource_group_name
+
+  xml_content = file("${path.module}/policies.xml")
+
+  depends_on = [
+    azurerm_api_management_api.logic_api,
+    azurerm_api_management_backend.logic_backend
+  ]
+}
+
+# Outputs
+output "logic_app_gateway_url" {
+  value = "${azurerm_api_management.apim.gateway_url}/${azurerm_api_management_api.logic_api.path}"
+}

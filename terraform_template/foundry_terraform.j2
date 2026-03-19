@@ -1,0 +1,63 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = ">= 3.0.0"
+    }
+  }
+}
+
+# 1. The APIM Service with Managed Identity enabled
+resource "azurerm_api_management" "apim" {
+  name                = lower("${var.prefix}-{{ api_suffix }}-apim")
+  location            = var.resource_group_location
+  resource_group_name = var.resource_group_name
+  publisher_name      = "AI-Team"
+  publisher_email     = "aiteam@technology.com"
+  sku_name            = "Developer_1"
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+# 2. The Backend (Points to your Foundry Endpoint URL)
+resource "azurerm_api_management_backend" "foundry_backend" {
+  name                = "{{ api_suffix }}-backend"
+  resource_group_name = var.resource_group_name
+  api_management_name = azurerm_api_management.apim.name
+  protocol            = "http"
+  url                 = "{{ backend_url }}"
+}
+
+# 3. The API Definition
+resource "azurerm_api_management_api" "foundry_api" {
+  name                = "{{ api_suffix }}-api"
+  resource_group_name = var.resource_group_name
+  api_management_name = azurerm_api_management.apim.name
+  revision            = "1"
+  display_name        = "{{ display_name }} ({{ model_name }})"
+  path                = "{{ api_suffix }}"
+  protocols           = ["https"]
+
+  subscription_required = {{ sub_required | lower }}
+}
+
+# 4. ENTRA ID ROLE ASSIGNMENT
+# This uses your 'entra_resource_id' to grant access automatically
+resource "azurerm_role_assignment" "ai_foundry_access" {
+  scope                = "{{ entra_resource_id }}"
+  role_definition_name = "Cognitive Services User"
+  principal_id         = azurerm_api_management.apim.identity[0].principal_id
+}
+
+# 5. Policy Application (using your policies.xml)
+resource "azurerm_api_management_api_policy" "foundry_policy" {
+  api_name            = azurerm_api_management_api.foundry_api.name
+  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = var.resource_group_name
+  xml_content         = file("${path.module}/policies.xml")
+
+  # Ensures the role is assigned before the policy tries to use it
+  depends_on = [azurerm_role_assignment.ai_foundry_access]
+}}

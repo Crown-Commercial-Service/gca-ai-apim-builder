@@ -1,0 +1,122 @@
+:root {
+    --css-colour: #8fb3ff;
+    --css-button-colour: #bbc946;
+    --css-button-colour-hover: #91a208;
+    --bg-gray: #f3f2f1;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-gray);
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: var(--css-colour);
+    color: white;
+    padding: 30px 40px 60px;
+    border-bottom: 4px solid var(--css-colour);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;  /* Vertically centers logo with the text */
+    max-width: 1000px;
+    margin: 0 auto;       /* Keeps the header content centered on the page */
+}
+
+.logo {
+    height: 60px;         /* Adjust this height to fit your specific logo */
+    width: auto;          /* Maintains aspect ratio */
+    margin-right: 30px;   /* Spacing between logo and the vertical line/text */
+    border-right: 1px solid rgba(255,255,255,0.3); /* Optional: adds a subtle divider line */
+    padding-right: 30px;
+}
+
+.header-text {
+    text-align: left;     /* Aligns text to the left so it sits next to the logo */
+}
+
+.header-text h1 {
+    margin: 0;
+    font-size: 1.8rem;    /* Adjusted size to look better next to a logo */
+}
+
+.header-text p {
+    margin: 5px 0 0;
+    opacity: 0.9;
+}
+
+main {
+max-width: 600px;
+    /* Changed from -30px to 40px to push the form down away from the header */
+    margin: 40px auto 60px;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    /* Ensures the form doesn't slide under the header on smaller screens */
+    position: relative;
+    z-index: 1;
+}
+
+section {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+h3 {
+    color: var(--css-colour);
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Fixes padding issues */
+}
+
+.btn-generate {
+    background-color: var(--css-button-colour);
+    color: white;
+    border: none;
+    padding: 15px 20px;
+    width: 100%;
+    font-size: 1.1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-generate:hover {
+    background-color: var(--css-button-colour-hover);
+}
+
+textarea {
+    width: 100%;
+    min-height: 120px; /* This sets a comfortable starting height */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit; /* Ensures the font matches the rest of the form */
+    resize: vertical;    /* Allows the user to drag it taller, but not wider (which breaks layout) */
+    box-sizing: border-box;
+}
+
+textarea:focus {
+    border-color: var(--azure-blue);
+    outline: none;
+    box-shadow: 0 0 4px rgba(0, 120, 212, 0.3);
+}
