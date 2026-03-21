@@ -5,9 +5,18 @@
         {% if enable_cors %}
         <cors allow-credentials="true">
             <allowed-origins>
-                <origin>{{ cors_origins }}</origin>
+                {# Check if it's a wildcard or a list of specific sites #}
+                {% if cors_origins == "*" %}
+                <origin>*</origin>
+                {% else %}
+                {# Split the comma-separated string from Python and loop #}
+                {% for origin in cors_origins.split(',') %}
+                <origin>{{ origin.strip() }}</origin>
+                {% endfor %}
+                {% endif %}
             </allowed-origins>
             <allowed-methods>
+                {# For Foundry/AI, usually POST and OPTIONS are enough #}
                 <method>*</method>
             </allowed-methods>
             <allowed-headers>

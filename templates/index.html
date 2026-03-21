@@ -22,11 +22,13 @@
 
             <section>
                 <h3>General & Governance</h3>
+                <label>Email Address*</label>
+                <input type="text" name="email" placeholder="your email address" required>
                 <label>Service Name *</label>
                 <input type="text" name="display_name" placeholder="e.g., Supplier Onboarding API" required>
 
                 <label>Business Domain *</label>
-              <input type="text" name="business_domain" placeholder="Examples / Notes: Does this belong to an existing group, or is it a brand new workload?" required>
+              <input type="text" name="business_domain" placeholder="e.g DDS" required>
 
 
                 <label>Description</label>
@@ -36,7 +38,7 @@
             <section>
                 <h3>Technical & Routing Details</h3>
                 <label>Unique Name for URL(Suffix)</label>
-                <input type="text" name="api_suffix" placeholder="Short and Unique Name (for the URL)" required>
+                <input type="text" name="api_suffix" placeholder="Short and Unique Name (for the URL) e.g ContractMapper" required>
 
                 <label>Backend Type *</label>
                 <select name="app_type" id="app_type" onchange="toggleAIFields()" required>
@@ -56,6 +58,13 @@
                     <input type="text" name="model_name" placeholder="e.g., gpt-4o">
 
                 </div>
+            <label for="vnet_type">Network Access Mode *</label>
+           <select name="vnet_type" id="vnet_type" required>
+              <option value="None" selected>Public (No VNet - Default)</option>
+                <option value="External">External VNet (Public URL, but can talk to private backends)</option>
+                <option value="Internal">Internal VNet (Private Only - Hidden from the internet)</option>
+            </select>
+
             </section>
 
             <section id="mapping-section">

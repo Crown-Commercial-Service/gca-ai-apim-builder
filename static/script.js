@@ -98,3 +98,4 @@ function addCorsRow() {
     `;
     tbody.appendChild(row);
 }
+

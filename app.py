@@ -4,7 +4,7 @@ import json
 import requests
 from pathlib import Path
 from generate_apim_files import generate_api_package
-
+#todo ask if vnet is being used if so what name
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "default-dev-key-123")
 app.config.update(
@@ -23,11 +23,13 @@ def get_form_data():
     """
     # 1. Basic Info
     data = {
+        "email": request.form.get("email"),
         "display_name": request.form.get("display_name"),
         "api_suffix":   request.form.get("api_suffix"),
         "app_type":     request.form.get("app_type"),
         "backend_url":  request.form.get("backend_url"),
         "sub_required": request.form.get("sub_required") == "yes",
+        "vnet_type": request.form.get("vnet_type"),
         "description": request.form.get("description"),
         "limit_by" : request.form.get("limit_by"),
         "rate_limit" : request.form.get("rate_limit"),
@@ -39,13 +41,9 @@ def get_form_data():
     # 2. CORS Logic
     data["enable_cors"] = request.form.get("CORS") == "yes"
     if data["enable_cors"]:
-        data["cors_origins"] = request.form.get("cors_origins", "*")
+        data["cors_origins"] = ", ".join(request.form.getlist("cors_origins[]")) if request.form.get("CORS") == "yes" else "*"
     else:
         data["cors_origins"] = ""
-
-    # # 3. OpenAPI URL (Only for FastAPI)
-    # if data["app_type"] == "fastapi":
-    #     data["openapi_url"] = request.form.get("openapi_url")
 
     # 3. OpenAPI URL (Only for FastAPI)
     if data["app_type"] == "ai_foundry":
