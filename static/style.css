@@ -120,3 +120,49 @@ textarea:focus {
     outline: none;
     box-shadow: 0 0 4px rgba(0, 120, 212, 0.3);
 }
+
+/* Success Page Specific Styles */
+.status-container {
+    background: #ffffff;
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    text-align: center;
+    border-top: 5px solid #28a745; /* Success Green */
+}
+
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #eafaf1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.checkmark {
+    color: #28a745;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.status-container h2 {
+    color: #323130;
+    margin-bottom: 15px;
+}
+
+.status-container p {
+    color: #605e5c;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.action-footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #edebe9;
+}

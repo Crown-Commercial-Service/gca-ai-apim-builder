@@ -158,6 +158,6 @@ def generate():
     # - Fetching OpenAPI if FastAPI
     # - Rendering main.tf.j2
 
-    return f"Data for {user_data['display_name']} captured! Check your terminal"
+    return render_template('success_page.html', display_name=user_data['display_name'])
 if __name__ == '__main__':
     app.run(debug=True)
