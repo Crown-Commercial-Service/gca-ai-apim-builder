@@ -166,3 +166,28 @@ textarea:focus {
     padding-top: 20px;
     border-top: 1px solid #edebe9;
 }
+
+/* Error Page Specific Styles */
+.error-card {
+    border-top: 5px solid #d83b01; /* Azure Error Red */
+}
+
+.error-icon {
+    background-color: #fde7e9;
+}
+
+.crossmark {
+    color: #d83b01;
+    font-size: 40px;
+    font-weight: bold;
+}
+
+.error-details {
+    background: #f3f2f1;
+    padding: 10px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #a4262c;
+    margin: 15px 0;
+}

@@ -145,19 +145,23 @@ def create_terraform_script():
 @app.route('/generate', methods=['POST'])
 def generate():
     # 1. Obtain all user inputs using our new method
-    user_data = get_form_data()
-    if user_data["app_type"] == "fastapi":
-        success, filepath, clean_data = create_fastapi_openai_json(user_data)
+    try:
+        user_data = get_form_data()
+        if user_data["app_type"] == "fastapi":
+            success, filepath, clean_data = create_fastapi_openai_json(user_data)
 
-    # 2. For debugging: Print to your terminal to see the clean dictionary
-    generated_data = generate_api_package(user_data)
-    print("--- User Input Received ---")
-    print(json.dumps(user_data, indent=4))
+        # 2. For debugging: Print to your terminal to see the clean dictionary
+        generated_data = generate_api_package(user_data)
+        print("--- User Input Received ---")
+        print(json.dumps(user_data, indent=4))
 
-    # Next steps will go here:
-    # - Fetching OpenAPI if FastAPI
-    # - Rendering main.tf.j2
+        # Next steps will go here:
+        # - Fetching OpenAPI if FastAPI
+        # - Rendering main.tf.j2
 
-    return render_template('success_page.html', display_name=user_data['display_name'])
+        return render_template('success_page.html', display_name=user_data['display_name'])
+    except Exception as e:
+        return render_template('error_page.html', error_message=str(e))
+
 if __name__ == '__main__':
     app.run(debug=True)
