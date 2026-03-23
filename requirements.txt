@@ -13,6 +13,10 @@ anyio==4.12.1
     #   httpx
     #   openai
     #   starlette
+azure-core==1.39.0
+    # via azure-storage-blob
+azure-storage-blob==12.28.0
+    # via -r requirements.in
 blinker==1.9.0
     # via flask
 certifi==2026.2.25
@@ -31,7 +35,9 @@ click==8.3.1
 colorama==0.4.6
     # via griffecli
 cryptography==46.0.5
-    # via google-auth
+    # via
+    #   azure-storage-blob
+    #   google-auth
 distro==1.9.0
     # via
     #   google-genai
@@ -80,6 +86,8 @@ importlib-metadata==8.7.1
     # via opentelemetry-api
 iniconfig==2.3.0
     # via pytest
+isodate==0.7.2
+    # via azure-storage-blob
 itsdangerous==2.2.0
     # via flask
 jinja2==3.1.6
@@ -132,6 +140,7 @@ regex==2026.2.28
     # via tiktoken
 requests==2.32.5
     # via
+    #   azure-core
     #   google-auth
     #   google-genai
     #   tiktoken
@@ -151,6 +160,8 @@ tqdm==4.67.3
 typing-extensions==4.15.0
     # via
     #   anyio
+    #   azure-core
+    #   azure-storage-blob
     #   fastapi
     #   google-genai
     #   groq

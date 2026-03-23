@@ -1,12 +1,32 @@
 import uuid
-import shutil
+from azure.storage.blob import ContainerClient, ExponentialRetry
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
+import tempfile
+from generate_fast_api_openapi import create_fastapi_openapi_json
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+def upload_to_azure_storage(local_path, azure_folder_name):
+    container_client = ContainerClient.from_connection_string(
+        conn_str=os.getenv("BLOB_CONNECTION_STRING"),
+        container_name=os.getenv("BLOB_CONTAINER_NAME"),
+        retry_policy=ExponentialRetry(initial_backoff=2, retry_total=5),
+    )
+    for file_path in Path(local_path).iterdir():
+        if file_path.is_file():
+            # Define the blob name (folder/filename.ext)
+            blob_name = f"{azure_folder_name}/{file_path.name}"
+            blob_client = container_client.get_blob_client(blob=blob_name)
+
+            with open(file_path, "rb") as data:
+                blob_client.upload_blob(data, overwrite=True)
 
 
 def generate_api_package(data):
-    """
-    Generates a unique API package by pulling from:
+    """ Generates all the IAC files from user's input:
     - policies_templates/
     - terraform_template/
     - output/ (for openapi.json)
@@ -32,29 +52,44 @@ def generate_api_package(data):
     policy_tmpl = env.get_template(policy_file)
     terraform_tmpl = env.get_template(tf_file)
 
-    # 3. Create a Unique Folder Name (Slugified Display Name + UUID)
-    clean_display_name = data.get("display_name", "api").replace(" ", "_").lower()
-    unique_id = str(uuid.uuid4())[:8]
-    folder_name = f"{clean_display_name}_{unique_id}"
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        working_dir = Path(tmp_dir)
+        if app_type == "fastapi":
+            success, filepath, clean_data = create_fastapi_openapi_json(data, target_dir=working_dir)
 
-    # Final destination path
-    output_path = Path.cwd() / folder_name
-    output_path.mkdir(parents=True, exist_ok=True)
+        rendered_policy = policy_tmpl.render(data)
+        rendered_terraform = terraform_tmpl.render(data)
+        (working_dir / "policies.xml").write_text(rendered_policy, encoding='utf-8')
+        (working_dir / "main.tf").write_text(rendered_terraform, encoding='utf-8')
 
-    # 4. Feature: Copy openapi.json if FastAPI (looking in your 'output' folder)
-    if app_type == "fastapi":
-        source_openapi = Path.cwd() / "output" / "openapi.json"
+        # Name for azure
+        clean_display_name = data.get("display_name", "api").replace(" ", "_").lower()
+        unique_id = str(uuid.uuid4())[:8]
+        azure_folder_name = f"{clean_display_name}_{unique_id}"
+        upload_to_azure_storage(working_dir, azure_folder_name)
 
-        if source_openapi.exists():
-            shutil.copy2(source_openapi, output_path / "openapi.json")
-        else:
-            print(f"Warning: openapi.json not found in 'output' folder.")
-
-    # 5. Render and Save
-    rendered_policy = policy_tmpl.render(data)
-    rendered_terraform = terraform_tmpl.render(data)
-
-    (output_path / "policies.xml").write_text(rendered_policy)
-    (output_path / "main.tf").write_text(rendered_terraform)
-
-    return str(output_path)
+    return "Process Complete"
+    #
+    # # 3. Create a Unique Folder Name (Slugified Display Name + UUID)
+    # clean_display_name = data.get("display_name", "api").replace(" ", "_").lower()
+    # unique_id = str(uuid.uuid4())[:8]
+    # folder_name = f"{clean_display_name}_{unique_id}"
+    #
+    # # Final destination path
+    # output_path = Path.cwd() / "output "/ folder_name
+    # output_path.mkdir(parents=True, exist_ok=True)
+    #
+    # # create openapi json actually here
+    # if app_type == "fastapi":
+    #     # I am not going to call create_fastapi_openai_json in here  rather than in flask
+    #     success, filepath, clean_data = create_fastapi_openai_json(data)
+    #
+    #
+    # # 5. Render and Save
+    # rendered_policy = policy_tmpl.render(data)
+    # rendered_terraform = terraform_tmpl.render(data)
+    #
+    # (output_path / "policies.xml").write_text(rendered_policy)
+    # (output_path / "main.tf").write_text(rendered_terraform)
+    #
+    # return str(output_path)

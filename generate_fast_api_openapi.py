@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import requests
 
-def clean_fastapi_openai_json(raw_json_string):
+def clean_fastapi_openapi_json(raw_json_string):
     try:
         spec = json.loads(raw_json_string)
 
@@ -61,18 +61,23 @@ def clean_fastapi_openai_json(raw_json_string):
         print(f"Cleaning failed: {e}")
         return raw_json_string
 
-def create_fastapi_openai_json(user_data):
+def create_fastapi_openapi_json(user_data, target_dir=None):
     if user_data["app_type"] == "fastapi":
         url = user_data["backend_url"]
         full_url = f"{url}/openapi.json"
 
-        output_dir = Path.cwd() / 'output'
+        if target_dir:
+            output_dir = Path(target_dir)
+        else:
+            output_dir = Path.cwd() / 'output'
+
         output_dir.mkdir(parents=True, exist_ok=True)
         file_path = output_dir / 'openapi.json'
+
         try:
             response = requests.get(full_url, timeout=10)
             response.raise_for_status()
-            clean_data = clean_fastapi_openai_json(response.text)
+            clean_data = clean_fastapi_openapi_json(response.text)
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(clean_data)
             return (True, file_path, clean_data)

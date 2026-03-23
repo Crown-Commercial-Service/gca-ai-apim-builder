@@ -4,7 +4,7 @@ import json
 import requests
 from pathlib import Path
 from generate_apim_files import generate_api_package
-from generate_fast_api_openapi import create_fastapi_openai_json
+from generate_fast_api_openapi import create_fastapi_openapi_json
 
 #todo ask if vnet is being used if so what name
 app = Flask(__name__)
@@ -68,16 +68,12 @@ def generate():
     try:
         user_data = get_form_data()
         if user_data["app_type"] == "fastapi":
-            success, filepath, clean_data = create_fastapi_openai_json(user_data)
+            success, filepath, clean_data = create_fastapi_openapi_json(user_data)
 
-        # 2. For debugging: Print to your terminal to see the clean dictionary
+        # check results
         generated_data = generate_api_package(user_data)
         print("--- User Input Received ---")
         print(json.dumps(user_data, indent=4))
-
-        # Next steps will go here:
-        # - Fetching OpenAPI if FastAPI
-        # - Rendering main.tf.j2
 
         return render_template('success_page.html', display_name=user_data['display_name'])
     except Exception as e:
