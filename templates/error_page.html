@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Azure APIM Onboarding</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <div class="header-text">
+                <h1>API Management Onboarding</h1>
+                <p>Automated Infrastructure-as-Code Generator</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="status-container error-card">
+            <div class="icon-circle error-icon">
+                <span class="crossmark">!</span>
+            </div>
+            <h2>Something went wrong</h2>
+            <p>We encountered an issue while processing your data</p>
+            <p class="error-details">please check if you filled in the form correctly</p>
+
+            <div class="action-footer">
+                <a href="/" class="btn-secondary">Try Again</a>
+                <p style="margin-top: 15px; font-size: 0.8rem;">Or contact <a href="mailto:admin@company.com">Cloud Support</a></p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

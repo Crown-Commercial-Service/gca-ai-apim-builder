@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success - Azure APIM Onboarding</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <div class="header-text">
+                <h1>API Management Onboarding</h1>
+                <p>Automated Infrastructure-as-Code Generator</p>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="status-container success-card">
+            <div class="icon-circle">
+                <span class="checkmark">✓</span>
+            </div>
+            <h2>Submission Received!</h2>
+            <p>Thank you for completing the form for <strong>{{ display_name }}</strong>.</p>
+            <p>You will hear from the TechOps team shortly.</p>
+
+            <div class="action-footer">
+                <a href="/" class="btn-secondary">Submit Another Request</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
