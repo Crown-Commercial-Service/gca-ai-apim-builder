@@ -4,6 +4,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 import tempfile
 from generate_fast_api_openapi import create_fastapi_openapi_json
+from devops_notes import save_users_input
 import os
 from dotenv import load_dotenv
 
@@ -62,6 +63,7 @@ def generate_api_package(data):
         rendered_terraform = terraform_tmpl.render(data)
         (working_dir / "policies.xml").write_text(rendered_policy, encoding='utf-8')
         (working_dir / "main.tf").write_text(rendered_terraform, encoding='utf-8')
+        receipt_user_inputs = save_users_input(data, working_dir)
 
         # Name for azure
         clean_display_name = data.get("display_name", "api").replace(" ", "_").lower()
