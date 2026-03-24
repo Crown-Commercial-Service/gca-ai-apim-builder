@@ -9,12 +9,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-def upload_to_azure_storage(local_path, azure_folder_name):
+def upload_to_azure_storage(local_path, azure_folder_name, user_email):
     container_client = ContainerClient.from_connection_string(
         conn_str=os.getenv("BLOB_CONNECTION_STRING"),
         container_name=os.getenv("BLOB_CONTAINER_NAME"),
         retry_policy=ExponentialRetry(initial_backoff=2, retry_total=5),
     )
+    blob_metadata = {"email": user_email}
     for file_path in Path(local_path).iterdir():
         if file_path.is_file():
             # Define the blob name (folder/filename.ext)
@@ -22,7 +23,7 @@ def upload_to_azure_storage(local_path, azure_folder_name):
             blob_client = container_client.get_blob_client(blob=blob_name)
 
             with open(file_path, "rb") as data:
-                blob_client.upload_blob(data, overwrite=True)
+                blob_client.upload_blob(data, overwrite=True, metadata=blob_metadata)
 
 
 def generate_api_package(data):
@@ -66,30 +67,6 @@ def generate_api_package(data):
         clean_display_name = data.get("display_name", "api").replace(" ", "_").lower()
         unique_id = str(uuid.uuid4())[:8]
         azure_folder_name = f"{clean_display_name}_{unique_id}"
-        upload_to_azure_storage(working_dir, azure_folder_name)
+        upload_to_azure_storage(working_dir, azure_folder_name, data["email"])
 
     return "Process Complete"
-    #
-    # # 3. Create a Unique Folder Name (Slugified Display Name + UUID)
-    # clean_display_name = data.get("display_name", "api").replace(" ", "_").lower()
-    # unique_id = str(uuid.uuid4())[:8]
-    # folder_name = f"{clean_display_name}_{unique_id}"
-    #
-    # # Final destination path
-    # output_path = Path.cwd() / "output "/ folder_name
-    # output_path.mkdir(parents=True, exist_ok=True)
-    #
-    # # create openapi json actually here
-    # if app_type == "fastapi":
-    #     # I am not going to call create_fastapi_openai_json in here  rather than in flask
-    #     success, filepath, clean_data = create_fastapi_openai_json(data)
-    #
-    #
-    # # 5. Render and Save
-    # rendered_policy = policy_tmpl.render(data)
-    # rendered_terraform = terraform_tmpl.render(data)
-    #
-    # (output_path / "policies.xml").write_text(rendered_policy)
-    # (output_path / "main.tf").write_text(rendered_terraform)
-    #
-    # return str(output_path)

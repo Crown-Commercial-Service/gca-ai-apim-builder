@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>TechOps Dashboard</title>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Logo">
+            <div class="header-text">
+                <h1>TechOps APIM Explorer</h1>
+                <p>Download Generated IaC Packages</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search by email or folder name..." autocomplete="off">
+        </div>
+
+        <table class="explorer-table">
+            <thead>
+                <tr>
+                    <th>Requester Email</th>
+                    <th>Folder Name</th>
+                    <th>Files Included</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                {% for folder in folders %}
+                <tr>
+                    <td>{{ folder.email }}</td>
+                    <td>{{ folder.name }}</td>
+                    <td><small>{{ folder.files | join(', ') }}</small></td>
+                    <td>
+                        <a href="/download/{{ folder.name }}" class="btn-download">Download .zip</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div id="noResults" style="display: none; text-align: center; padding: 40px; color: #666; font-style: italic;">
+            No matching records found for your search.
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>
