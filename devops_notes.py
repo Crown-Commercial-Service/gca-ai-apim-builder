@@ -17,10 +17,14 @@ def save_users_input(form_data, target_dir):
 
     # 4. Prepare the Content with an f-string
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    quota_info = form_data.get('quota', 'No Quota')
+    if quota_info == "0" :
+        quota_info = "No Quota"
 
-    receipt_content = f"""# 📝 Deployment Request Receipt
-    **Generated On:** {timestamp}
-    **Requester:** {form_data.get('email', 'N/A')}
+
+    receipt_content =f"""# 📝 Deployment Request Receipt
+    ** Generated On:** {timestamp}
+    ** Requester:** {form_data.get('email', 'N/A')}
     
     ---
     
@@ -39,7 +43,7 @@ def save_users_input(form_data, target_dir):
     ## 🚦 Traffic Management
     * **Limit By:** {form_data.get('limit_by', 'N/A')}
     * **Rate Limit:** {form_data.get('rate_limit', '0')} calls per {form_data.get('rate_period', 'N/A')}
-    * **Quota:** {form_data.get('quota', 'No Quota')}
+    * **Quota:** {quota_info}
     
     ---
     
@@ -49,13 +53,14 @@ def save_users_input(form_data, target_dir):
     ---
     
     ## 📂 Raw JSON Metadata
+    
     <details>
     <summary>Click to view raw data</summary>
     
     ```json
     {json.dumps(form_data, indent=4)}
     </details>
-    """
+"""
     file_path.write_text(receipt_content, encoding='utf-8')
 
     print(f"✅ Success! Receipt saved to: {file_path.absolute()}")
