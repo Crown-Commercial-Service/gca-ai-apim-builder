@@ -9,7 +9,7 @@ terraform {
 
 # 1. The APIM Service Instance
 resource "azurerm_api_management" "apim" {
-  name                = lower("${var.prefix}-{{ path }}-apim")
+  name                = lower("${var.prefix}-{{ api_suffix }}-apim")
   location            = var.resource_group_location
   resource_group_name = var.resource_group_name
   publisher_name      = "AI-Team"
