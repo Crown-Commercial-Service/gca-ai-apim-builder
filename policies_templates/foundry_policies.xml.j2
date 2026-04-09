@@ -62,7 +62,7 @@
             )" />
         {% endif %}
 
-        <set-backend-service backend-id="{{ api_suffix }}-backend" />
+        <set-backend-service base-url="{{ backend_url }}" />
 
     </inbound>
     <backend>
