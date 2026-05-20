@@ -7,25 +7,17 @@ terraform {
   }
 }
 
-# 1. The APIM Service Instance
-resource "azurerm_api_management" "apim" {
-  name                = lower("${var.prefix}-{{ api_suffix }}-apim")
-  location            = var.resource_group_location
-  resource_group_name = var.resource_group_name
-  publisher_name      = "AI-Team"
-  publisher_email     = "aiteam@technology.com"
-  sku_name            = "Developer_1"
-
-  identity {
-    type = "SystemAssigned"
-  }
+# 1. The APIM Service Instance connect to existing APIM
+data "azurerm_api_management" "apim" {
+  name                = "AzP-UKS-APIM"
+  resource_group_name = "AzP-UKS-Shared"
 }
 
 # 2. The Backend Connection
 resource "azurerm_api_management_backend" "app_backend" {
   name                = "{{ api_suffix }}-backend"
-  resource_group_name = var.resource_group_name
-  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
+  api_management_name = data.azurerm_api_management.apim.name
   protocol            = "http"
   url                 = "{{ backend_url }}"
 }
@@ -33,8 +25,8 @@ resource "azurerm_api_management_backend" "app_backend" {
 # 3. The API Definition (Importing your cleaned JSON)
 resource "azurerm_api_management_api" "apim_api" {
   name                = "{{ api_suffix }}-api"
-  resource_group_name = var.resource_group_name
-  api_management_name = azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
+  api_management_name = data.azurerm_api_management.apim.name
   revision            = "1"
   display_name        = "{{ display_name }}"
   path                = "{{ api_suffix }}"
@@ -52,8 +44,8 @@ resource "azurerm_api_management_api" "apim_api" {
 # 4. Product (The 'Package' for the API)
 resource "azurerm_api_management_product" "apim_product" {
   product_id            = "{{ api_suffix }}-product"
-  api_management_name   = azurerm_api_management.apim.name
-  resource_group_name   = var.resource_group_name
+  api_management_name   = data.azurerm_api_management.apim.name
+  resource_group_name   = data.azurerm_api_management.apim.resource_group_name
   display_name          = "{{ display_name }} Product"
   subscription_required = {{ sub_required | lower }}
   approval_required     = false
@@ -64,15 +56,15 @@ resource "azurerm_api_management_product" "apim_product" {
 resource "azurerm_api_management_product_api" "product_api_link" {
   api_name            = azurerm_api_management_api.apim_api.name
   product_id          = azurerm_api_management_product.apim_product.product_id
-  api_management_name = azurerm_api_management.apim.name
-  resource_group_name = var.resource_group_name
+  api_management_name = data.azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
 }
 
 {% if sub_required %}
 # 6. Subscription (The actual API Key)
 resource "azurerm_api_management_subscription" "user_subscription" {
-  api_management_name = azurerm_api_management.apim.name
-  resource_group_name = var.resource_group_name
+  api_management_name = data.azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
   product_id          = azurerm_api_management_product.apim_product.id
   display_name        = "{{ display_name }} Subscription Key"
   state               = "active"
@@ -82,8 +74,8 @@ resource "azurerm_api_management_subscription" "user_subscription" {
 # 7. Policy (CORS, Rate Limits, etc.)
 resource "azurerm_api_management_api_policy" "apim_policy" {
   api_name            = azurerm_api_management_api.apim_api.name
-  api_management_name = azurerm_api_management.apim.name
-  resource_group_name = var.resource_group_name
+  api_management_name = data.azurerm_api_management.apim.name
+  resource_group_name = data.azurerm_api_management.apim.resource_group_name
 
   xml_content = file("${path.module}/policies.xml")
 
@@ -93,7 +85,8 @@ resource "azurerm_api_management_api_policy" "apim_policy" {
   ]
 }
 
-# Outputs for the Tech Team
+
 output "gateway_url" {
-  value = "${azurerm_api_management.apim.gateway_url}/${azurerm_api_management_api.apim_api.path}"
+
+  value = "${data.azurerm_api_management.apim.gateway_url}/${azurerm_api_management_api.apim_api.path}"
 }
