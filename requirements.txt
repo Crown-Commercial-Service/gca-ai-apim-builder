@@ -28,8 +28,6 @@ click==8.3.1
     # via
     #   flask
     #   uvicorn
-colorama==0.4.6
-    # via griffecli
 cryptography==46.0.5
     # via google-auth
 distro==1.9.0
@@ -45,16 +43,10 @@ genai-prices==0.0.55
     # via pydantic-ai-slim
 google-auth[requests]==2.49.1
     # via google-genai
-google-genai==1.68.0
+google-genai==2.5.0
     # via pydantic-ai-slim
-griffe==2.0.0
-    # via pydantic-ai-slim
-griffecli==2.0.0
-    # via griffe
 griffelib==2.0.0
-    # via
-    #   griffe
-    #   griffecli
+    # via pydantic-ai-slim
 groq==1.1.1
     # via pydantic-ai-slim
 h11==0.16.0
@@ -110,11 +102,11 @@ pydantic==2.12.5
     #   openai
     #   pydantic-ai-slim
     #   pydantic-graph
-pydantic-ai-slim[google,groq,openai]==1.59.0
+pydantic-ai-slim[google,groq,openai]==1.99.0
     # via -r requirements.in
 pydantic-core==2.41.5
     # via pydantic
-pydantic-graph==1.59.0
+pydantic-graph==1.99.0
     # via pydantic-ai-slim
 python-dotenv==1.1.1
     # via -r requirements.in
