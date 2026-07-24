@@ -95,7 +95,7 @@ openai==2.29.0
     # via pydantic-ai-slim
 opentelemetry-api==1.40.0
     # via pydantic-ai-slim
-pyasn1==0.6.3
+pyasn1==0.6.4
     # via pyasn1-modules
 pyasn1-modules==0.4.2
     # via google-auth
